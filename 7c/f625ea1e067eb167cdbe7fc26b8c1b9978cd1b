@@ -1,0 +1,33 @@
+chrome/player/options/defaults/DefaultOptions.mjs
+  h_ce6b902e78ef3d 27,44-45
+build.mjs
+  s_49f46508968836::t_3b11a94161c31a 281-287,297,339
+  h_ce6b902e78ef3d 371
+chrome/player/ui/InterfaceController.mjs
+  h_ce6b902e78ef3d 477-479
+chrome/player/assets/fluidplayer/css/fluidplayer.css
+  h_ce6b902e78ef3d 3186
+chrome/player/options/defaults/ToolSettings.mjs
+  h_ce6b902e78ef3d 47-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7cf625ea1e067eb167cdbe7fc26b8c1b9978cd1b",
+  "prompts": {},
+  "humans": {
+    "h_ce6b902e78ef3d": {
+      "author": "Wyvrn Res <wyvrnres@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_49f46508968836": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "baa87baf-cd06-4204-b1ad-121969bea76b",
+        "model": "copilot/auto"
+      },
+      "human_author": "Wyvrn Res <wyvrnres@users.noreply.github.com>"
+    }
+  }
+}
