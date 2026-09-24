@@ -971,6 +971,18 @@
     "options_general_tplclickaction": {
         "message": "Triple click action"
     },
+    "options_general_seektapcount": {
+        "message": "Taps needed for left/right seek zones"
+    },
+    "options_general_seektapcount_single": {
+        "message": "Single tap"
+    },
+    "options_general_seektapcount_double": {
+        "message": "Double tap"
+    },
+    "options_general_seektapcount_triple": {
+        "message": "Triple tap"
+    },
     "options_general_clickaction_nothing": {
         "message": "Do nothing"
     },

@@ -17,6 +17,7 @@ import {DaltonizerTypes} from './defaults/DaltonizerTypes.mjs';
 import {DefaultToolSettings} from './defaults/ToolSettings.mjs';
 import {DefaultQualities} from './defaults/DefaultQualities.mjs';
 import {ColorThemes} from './defaults/ColorThemes.mjs';
+import {TapCounts} from './defaults/TapCounts.mjs';
 
 let Options = {};
 const analyzeVideos = document.getElementById('analyzevideos');
@@ -38,6 +39,7 @@ const exportButton = document.getElementById('export');
 const clickAction = document.getElementById('clickaction');
 const dblclickAction = document.getElementById('dblclickaction');
 const tplclickAction = document.getElementById('tplclickaction');
+const seekTapCount = document.getElementById('seektapcount');
 const visChangeAction = document.getElementById('vischangeaction');
 const customSourcePatterns = document.getElementById('customSourcePatterns');
 const showWhenMiniSelected = document.getElementById('showWhenMiniSelected');
@@ -65,6 +67,56 @@ customSourcePatterns.setAttribute('autocomplete', 'off');
 customSourcePatterns.setAttribute('autocorrect', 'off');
 customSourcePatterns.setAttribute('spellcheck', false);
 customSourcePatterns.placeholder = '# This is a comment. Use the following format.\n[file extension] /[regex]/[flags]';
+
+// Make each options section collapsible. Sections start collapsed.
+function setupCollapsibleSections() {
+  document.querySelectorAll('.options-section').forEach((section, index) => {
+    const heading = section.querySelector('.section-heading');
+    if (!heading) {
+      return;
+    }
+    // Move all content after the heading into an animatable wrapper
+    const nodes = [];
+    let node = heading.nextSibling;
+    while (node) {
+      nodes.push(node);
+      node = node.nextSibling;
+    }
+    const body = document.createElement('div');
+    body.className = 'section-body';
+    body.id = 'section-body-' + index;
+    const content = document.createElement('div');
+    content.className = 'section-content';
+    nodes.forEach((child) => content.appendChild(child));
+    body.appendChild(content);
+    section.appendChild(body);
+
+    const chevron = document.createElement('span');
+    chevron.className = 'section-chevron';
+    chevron.setAttribute('aria-hidden', 'true');
+    heading.appendChild(chevron);
+
+    section.classList.add('collapsed');
+
+    const toggleSection = () => {
+      const collapsed = section.classList.toggle('collapsed');
+      heading.setAttribute('aria-expanded', String(!collapsed));
+    };
+
+    WebUtils.setupTabIndex(heading);
+    heading.setAttribute('aria-expanded', 'false');
+    heading.setAttribute('aria-controls', body.id);
+    heading.addEventListener('click', toggleSection);
+    heading.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleSection();
+      }
+    });
+  });
+}
+
+setupCollapsibleSections();
 
 // Initialize store and then load page controls
 OptionsStore.init().then(() => loadOptions(OptionsStore.get()));
@@ -115,6 +167,7 @@ async function loadOptions(newOptions) {
   setSelectMenuValue(clickAction, Options.singleClickAction);
   setSelectMenuValue(dblclickAction, Options.doubleClickAction);
   setSelectMenuValue(tplclickAction, Options.tripleClickAction);
+  setSelectMenuValue(seekTapCount, Options.seekTapCount);
   setSelectMenuValue(visChangeAction, Options.visChangeAction);
   setSelectMenuValue(colorTheme, Options.colorTheme);
   setSelectMenuValue(miniPos, Options.miniPos);
@@ -221,6 +274,11 @@ createSelectMenu(dblclickAction, Object.values(ClickActions), Options.doubleClic
 
 createSelectMenu(tplclickAction, Object.values(ClickActions), Options.tripleClickAction, 'options_general_clickaction', (e) => {
   Options.tripleClickAction = e.target.value;
+  optionChanged();
+});
+
+createSelectMenu(seekTapCount, Object.values(TapCounts), Options.seekTapCount, 'options_general_seektapcount', (e) => {
+  Options.seekTapCount = e.target.value;
   optionChanged();
 });
 

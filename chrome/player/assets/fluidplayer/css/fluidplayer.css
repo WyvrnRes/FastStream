@@ -3145,6 +3145,15 @@ input.crosstalk_calculator_input {
         right: 5px;
     }
 
+    .window_header {
+        padding: 8px 5px;
+    }
+
+    .window_header .close_button {
+        width: 22px;
+        height: 22px;
+    }
+
     .loop_menu,
     .subtitles_menu {
         width: 200px;

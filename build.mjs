@@ -36,7 +36,24 @@ function deleteDirectoryRecursively(dirPath) {
         fs.unlinkSync(curPath);
       }
     });
-    fs.rmdirSync(dirPath);
+    // On Windows the directory itself can be temporarily locked by another
+    // process (IDE file watchers, indexers). Retry briefly, and if still busy
+    // leave the (now empty) directory in place — it is recreated below anyway.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        fs.rmdirSync(dirPath);
+        return;
+      } catch (e) {
+        if (e.code !== 'EBUSY' && e.code !== 'EPERM') {
+          throw e;
+        }
+        const waitUntil = Date.now() + 250;
+        while (Date.now() < waitUntil) {
+          // busy-wait ~250ms between attempts
+        }
+      }
+    }
+    console.warn(`[Build] Could not remove locked directory ${dirPath}; leaving it in place`);
   }
 }
 

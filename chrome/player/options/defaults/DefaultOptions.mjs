@@ -5,6 +5,7 @@ import {ColorThemes} from './ColorThemes.mjs';
 import {DaltonizerTypes} from './DaltonizerTypes.mjs';
 import {DefaultKeybinds} from './DefaultKeybinds.mjs';
 import {MiniplayerPositions} from './MiniplayerPositions.mjs';
+import {TapCounts} from './TapCounts.mjs';
 import {VideoFitModes} from './VideoFitModes.mjs';
 import {VisChangeActions} from './VisChangeActions.mjs';
 
@@ -40,6 +41,7 @@ export const DefaultOptions = {
   maxSpeed: -1,
   maxVideoSize: 5000000000, // 5GB max size
   seekStepSize: 2,
+  seekTapCount: TapCounts.SINGLE,
   singleClickAction: ClickActions.PLAY_PAUSE,
   doubleClickAction: ClickActions.NOTHING,
   tripleClickAction: ClickActions.FULLSCREEN,

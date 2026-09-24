@@ -4,6 +4,7 @@ import {Coloris} from '../modules/coloris.mjs';
 import {Localize} from '../modules/Localize.mjs';
 import {ClickActions} from '../options/defaults/ClickActions.mjs';
 import {MiniplayerPositions} from '../options/defaults/MiniplayerPositions.mjs';
+import {TapCounts} from '../options/defaults/TapCounts.mjs';
 import {VideoFitModes} from '../options/defaults/VideoFitModes.mjs';
 import {VisChangeActions} from '../options/defaults/VisChangeActions.mjs';
 import {EnvUtils} from '../utils/EnvUtils.mjs';
@@ -1047,6 +1048,10 @@ export class InterfaceController {
     let clickCount = 0;
     let clickTimeout = null;
     const seekAmount = ()=> Math.max(10, this.client.options.seekStepSize * 5);
+    const seekZoneStates = {
+      left: {count: 0, timeout: null},
+      right: {count: 0, timeout: null},
+    };
 
     const handleTapAction = (clickAction) => {
       switch (clickAction) {
@@ -1074,6 +1079,28 @@ export class InterfaceController {
     };
 
     const handleSeekTap = (direction) => {
+      const amount = seekAmount();
+      this.client.setSeekSave(false);
+      this.client.currentTime += direction === 'left' ? -amount : amount;
+      this.client.setSeekSave(true);
+      this.showSeekIndicator(direction, amount);
+      this.showControlBarTemporarily(1200);
+    };
+
+    const getRequiredSeekTaps = () => {
+      const tapCount = this.client.options.seekTapCount;
+      if (tapCount === TapCounts.DOUBLE) {
+        return 2;
+      }
+      if (tapCount === TapCounts.TRIPLE) {
+        return 3;
+      }
+      return 1;
+    };
+
+    // Counts taps in a seek zone and only triggers the seek once the
+    // configured tap count (single/double/triple) is reached.
+    const handleSeekZoneTap = (direction) => {
       stopSpeedUp();
       if (!this.client.player) return;
       if (this.closeAllMenus(false)) return;
@@ -1083,22 +1110,32 @@ export class InterfaceController {
         return;
       }
 
-      const amount = seekAmount();
-      this.client.setSeekSave(false);
-      this.client.currentTime += direction === 'left' ? -amount : amount;
-      this.client.setSeekSave(true);
-      this.showSeekIndicator(direction, amount);
-      this.showControlBarTemporarily(1200);
+      const requiredTaps = getRequiredSeekTaps();
+      const state = seekZoneStates[direction];
+      state.count = state.timeout !== null ? state.count + 1 : 1;
+      clearTimeout(state.timeout);
+      state.timeout = null;
+
+      if (state.count >= requiredTaps) {
+        state.count = 0;
+        handleSeekTap(direction);
+        return;
+      }
+
+      state.timeout = setTimeout(() => {
+        state.timeout = null;
+        state.count = 0;
+      }, 300);
     };
 
     DOMElements.tapZoneLeft.addEventListener('click', (e) => {
       e.stopPropagation();
-      handleSeekTap('left');
+      handleSeekZoneTap('left');
     });
 
     DOMElements.tapZoneRight.addEventListener('click', (e) => {
       e.stopPropagation();
-      handleSeekTap('right');
+      handleSeekZoneTap('right');
     });
 
     DOMElements.tapZoneCenter.addEventListener('click', (e) => {

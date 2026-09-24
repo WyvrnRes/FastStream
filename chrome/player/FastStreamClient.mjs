@@ -15,6 +15,7 @@ import {Localize} from './modules/Localize.mjs';
 import {ClickActions} from './options/defaults/ClickActions.mjs';
 import {VisChangeActions} from './options/defaults/VisChangeActions.mjs';
 import {MiniplayerPositions} from './options/defaults/MiniplayerPositions.mjs';
+import {TapCounts} from './options/defaults/TapCounts.mjs';
 import {VideoFitModes} from './options/defaults/VideoFitModes.mjs';
 import {SecureMemory} from './modules/SecureMemory.mjs';
 import {CSSFilterUtils} from './utils/CSSFilterUtils.mjs';
@@ -83,6 +84,7 @@ export class FastStreamClient extends EventEmitter {
       videoDaltonizerStrength: 1,
       videoZoom: 1,
       seekStepSize: 0.2,
+      seekTapCount: TapCounts.SINGLE,
       defaultQuality: 'Auto',
       toolSettings: Utils.mergeOptions(DefaultToolSettings, {}),
       videoDelay: 0,
@@ -313,6 +315,7 @@ export class FastStreamClient extends EventEmitter {
     this.options.maxSpeed = options.maxSpeed;
     this.options.maxVideoSize = options.maxVideoSize;
     this.options.seekStepSize = options.seekStepSize;
+    this.options.seekTapCount = options.seekTapCount;
     this.options.singleClickAction = options.singleClickAction;
     this.options.doubleClickAction = options.doubleClickAction;
     this.options.tripleClickAction = options.tripleClickAction;

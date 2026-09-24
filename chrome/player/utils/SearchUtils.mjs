@@ -46,6 +46,11 @@ export function initsearch() {
 // Resets the research candidates. Used probably a bit more than I'd like, but it's functional
 export function resetSearch() {
   const instance = Search.get_search_instance();
+  // Restore sections that were auto-expanded by an active search back to collapsed
+  document.querySelectorAll('.collapsed-by-search').forEach((el) => {
+    el.classList.add('collapsed');
+    el.classList.remove('collapsed-by-search');
+  });
   const removalEls = [...instance.baseSearchEls, ...instance.keybindSearchEls];
   removalEls.forEach((el) => {
     el.style.display = 'none';
@@ -112,6 +117,11 @@ function renderSectionCounts(instance, query) {
       section.element.classList.add('section-hidden-by-search');
     } else {
       section.element.classList.remove('section-hidden-by-search');
+      // Auto-expand collapsed sections with matches so results stay visible
+      if (filtering && section.element.classList.contains('collapsed')) {
+        section.element.classList.add('collapsed-by-search');
+        section.element.classList.remove('collapsed');
+      }
     }
   });
 }

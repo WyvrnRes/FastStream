@@ -5831,6 +5831,18 @@
         "zh_CN": "三击操作",
         "zh_TW": "三擊動作"
     },
+    "options_general_seektapcount": {
+        "en": "Taps needed for left/right seek zones"
+    },
+    "options_general_seektapcount_single": {
+        "en": "Single tap"
+    },
+    "options_general_seektapcount_double": {
+        "en": "Double tap"
+    },
+    "options_general_seektapcount_triple": {
+        "en": "Triple tap"
+    },
     "options_general_clickaction_nothing": {
         "en": "Do nothing",
         "de": "Nichts tun",

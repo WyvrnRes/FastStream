@@ -1,6 +1,10 @@
 /* Modernized options page styles */
 @import url("../assets/fluidplayer/css/colors.css");
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Design tokens */
 body {
   /* spacing */
@@ -13,41 +17,33 @@ body {
   /* radius */
   --radius-1: 6px;
   --radius-2: 8px;
+  --radius-3: 14px;
+
+  /* elevation */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.07);
 
   /* typography */
   --font-body: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   --font-size-1: 14px;
   --line-height: 1.5;
 
-  /* colors (light) */
-  --color-bg: #ffffff;
-  --color-bg-muted: #f6f8fa;
-  --color-text: #1f2328;
-  --color-muted: #57606a;
-  --color-border: #d0d7de;
-  --color-elev: #ffffff;
-  --color-primary: #0969da;
-  --color-primary-contrast: #ffffff;
-  --color-focus: #1f6feb;
+  /* colors — follow the selected player color theme. colors.css defines these
+     player theme variables on body[data-theme="..."], which the options page
+     sets on load, so the settings menu always matches the chosen theme. */
+  --color-bg: var(--mainplayer-background-color);
+  --color-bg-muted: color-mix(in oklab, var(--popwindow-text-color) 10%, var(--mainplayer-background-color));
+  --color-text: var(--popwindow-text-color);
+  --color-muted: color-mix(in oklab, var(--color-text) 70%, transparent);
+  --color-border: color-mix(in oklab, var(--color-text) 25%, transparent);
+  --color-elev: var(--mainplayer-background-color);
+  --color-primary: var(--link-color);
+  --color-primary-contrast: var(--popwindow-button-text-color);
+  --color-focus: var(--popwindow-textinput-focus-border-color);
 
   /* controls */
   --control-height: 28px;
   --control-pad-y: 4px;
   --control-pad-x: 8px;
-}
-
-@media (prefers-color-scheme: dark) {
-  body:not(.frame) {
-    --color-bg: #23212a;
-    --color-bg-muted: #0f1720;
-    --color-text: #e5e7eb;
-    --color-muted: #9ca3af;
-    --color-border: #273041;
-    --color-elev: #111826;
-    --color-primary: #60a5fa;
-    --color-primary-contrast: #0b0f14;
-    --color-focus: #7aa2ff;
-  }
 }
 
 * {
@@ -64,36 +60,15 @@ body {
   background: var(--color-bg);
 }
 
-/* When embedded inside the player, adopt player theme variables */
+/* When embedded inside the player, blend with the player popup surface.
+   All other tokens already inherit from the selected theme (see above). */
 body.frame {
-  /* map tokens to player theme variables */
   --color-bg: var(--popwindow-background-color);
   --color-bg-muted: var(--popwindow-dropdown-item-background-color);
-  --color-text: var(--popwindow-text-color);
-  --color-muted: color-mix(in oklab, var(--color-text) 70%, transparent);
   --color-elev: var(--input-background-color);
-  --color-primary: var(--link-color);
-  --color-primary-contrast: var(--popwindow-button-text-color);
-  --color-focus: var(--popwindow-textinput-focus-border-color);
   background: transparent;
   margin: 0px;
   padding: 4px 20px;
-}
-
-/* Inputs/selects/textarea inside frame should use exact player borders/backgrounds */
-body.frame input,
-body.frame select,
-body.frame textarea {
-  border: var(--input-border);
-  background-color: var(--input-background-color);
-  color: var(--input-text-color);
-}
-
-body.frame input:focus-visible,
-body.frame select:focus-visible,
-body.frame textarea:focus-visible {
-  outline: var(--input-focus-border);
-  outline-offset: 2px;
 }
 
 /* Buttons follow popwindow button styles when embedded */
@@ -127,16 +102,19 @@ body.frame a:focus-visible {
   outline: none;
 }
 
-/* Keybind input chips match input styling in frame */
-body.frame .keybind-input {
-  border: var(--input-border);
-  background: var(--input-background-color);
-  color: var(--input-text-color);
+body:not(.frame) {
+  max-width: 860px;
+  margin: 0 auto;
+  background: var(--color-bg-muted);
+  color-scheme: dark;
 }
 
-body:not(.frame) {
-  min-width: 600px;
-  margin: auto;
+/* Light player themes get light native form controls */
+body:not(.frame)[data-theme="arctic"],
+body:not(.frame)[data-theme="sunset"],
+body:not(.frame)[data-theme="desert"],
+body:not(.frame)[data-theme="mint"] {
+  color-scheme: light;
 }
 
 #version {
@@ -242,10 +220,10 @@ p.hint {
 
 .keybind-input {
   cursor: pointer;
-  border: 1px solid var(--color-border);
+  border: var(--input-border);
   border-radius: var(--radius-1);
-  background: var(--color-elev);
-  color: var(--color-text);
+  background: var(--input-background-color);
+  color: var(--input-text-color);
   text-align: center;
   grid-column: 2;
   padding: var(--control-pad-y) var(--control-pad-x);
@@ -259,12 +237,12 @@ p.hint {
 
 #autoEnableURLs,
 #customSourcePatterns {
-  color: var(--color-text);
-  background-color: var(--color-elev);
+  color: var(--input-text-color);
+  background-color: var(--input-background-color);
   font-size: var(--font-size-1);
   border-radius: var(--radius-1);
   padding: var(--control-pad-y) var(--control-pad-x);
-  border: 1px solid var(--color-border);
+  border: var(--input-border);
   width: 100%;
   height: 150px;
   resize: vertical;
@@ -285,6 +263,12 @@ button {
   cursor: pointer;
   padding: var(--control-pad-y) var(--control-pad-x);
   min-height: var(--control-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  transition: background-color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
 }
 
 button:hover {
@@ -374,14 +358,19 @@ button:focus-visible {
 }
 
 .searchcontainer {
-  top: var(--space-2);
+  position: sticky;
+  top: 0;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: var(--space-3);
   flex-wrap: wrap;
-  background: transparent;
+  padding: var(--space-2) 0;
+  margin-bottom: var(--space-2);
+  background: color-mix(in oklab, var(--color-bg) 82%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: var(--radius-2);
 }
 
@@ -394,7 +383,7 @@ button:focus-visible {
   min-height: 36px;
   width: 100%;
   max-width: none;
-  background: var(--color-elev);
+  background: var(--input-background-color);
   border: var(--input-border);
   border-radius: 999px;
 }
@@ -459,6 +448,11 @@ button:focus-visible {
 
 .options-section {
   scroll-margin-top: 80px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-3);
+  background: var(--color-elev);
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  box-shadow: var(--shadow-1);
 }
 
 .section-heading {
@@ -466,10 +460,58 @@ button:focus-visible {
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
 }
 
 .section-heading h1 {
-  margin: var(--space-6) 0 var(--space-2);
+  margin: var(--space-2) 0 var(--space-1);
+  flex: 1;
+}
+
+.section-heading:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-1);
+}
+
+.section-chevron {
+  flex: none;
+  align-self: center;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--color-muted);
+  border-bottom: 2px solid var(--color-muted);
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.section-heading:hover .section-chevron {
+  border-color: var(--color-text);
+}
+
+.options-section.collapsed .section-chevron {
+  transform: rotate(-45deg);
+}
+
+.section-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.options-section.collapsed .section-body {
+  grid-template-rows: 0fr;
+}
+
+.section-content {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.options-section.collapsed {
+  padding-bottom: var(--space-2);
 }
 
 .section-count {
@@ -489,6 +531,22 @@ button:focus-visible {
 
 .section-hidden-by-search {
   display: none;
+}
+
+/* Compact rhythm: drop legacy <br> spacers around option rows, use margins instead */
+.options-section br:has(+ .option),
+.options-section .option + br {
+  display: none;
+}
+
+.options-section .search-target-remove + .search-target-remove,
+.options-section .search-target-remove + #showWhenMiniSelected,
+.options-section .search-target-remove + textarea {
+  margin-top: var(--space-3);
+}
+
+#top-general-options .option + .option {
+  margin-top: var(--space-2) !important;
 }
 
 .option.grid1 {
@@ -527,12 +585,12 @@ button:focus-visible {
 input,
 select,
 textarea {
-  border: 1px solid var(--color-border);
+  border: var(--input-border);
   border-radius: var(--radius-1);
   padding: var(--control-pad-y) var(--control-pad-x);
   outline: none;
-  background-color: var(--color-elev);
-  color: var(--color-text);
+  background-color: var(--input-background-color);
+  color: var(--input-text-color);
   font-size: var(--font-size-1);
   min-height: var(--control-height);
 }
@@ -545,7 +603,7 @@ input[type="range"] {
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--color-focus);
+  outline: var(--input-focus-border);
   outline-offset: 2px;
 }
 
@@ -581,17 +639,17 @@ textarea:focus-visible {
 .select>select {
   width: 100%;
   height: 100%;
-  border: 1px solid var(--color-border);
+  border: var(--input-border);
   border-radius: var(--radius-1);
   padding: var(--control-pad-y) var(--control-pad-x);
   outline: none;
-  background-color: var(--color-elev);
-  color: var(--color-text);
+  background-color: var(--input-background-color);
+  color: var(--input-text-color);
   font-size: var(--font-size-1);
 }
 
 .select>select:focus-visible {
-  outline: 2px solid var(--color-focus);
+  outline: var(--input-focus-border);
   outline-offset: 2px;
 }
 
@@ -611,4 +669,136 @@ input[type="checkbox"]:focus-visible {
   grid-template-columns: auto auto 1fr;
   gap: var(--space-2) var(--space-3);
   align-items: center;
+}
+
+/* ---------- Mobile / narrow screens ---------- */
+@media screen and (max-width: 640px) {
+  body {
+    font-size: 15px;
+    padding: var(--space-3) var(--space-3);
+    padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.frame {
+    padding: var(--space-1) 10px var(--space-4);
+  }
+
+  /* Prevent iOS zoom-on-focus and enlarge touch targets */
+  input,
+  select,
+  textarea,
+  .keybind-input {
+    font-size: 16px;
+  }
+
+  .select>select {
+    font-size: 16px;
+  }
+
+  input,
+  select,
+  textarea,
+  .keybind-input {
+    min-height: 40px;
+  }
+
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .option.grid1 {
+    grid-template-columns: 24px 1fr;
+  }
+
+  .option.grid2 {
+    grid-template-columns: 1fr minmax(120px, 42%);
+  }
+
+  #top-general-options .option.grid2 {
+    margin-left: 0 !important;
+  }
+
+  /* Stack video option rows: label + value on top, slider underneath */
+  .options-with-range-table {
+    grid-template-columns: 1fr auto;
+  }
+
+  .video-option {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    row-gap: var(--space-1);
+  }
+
+  .video-option .label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .video-option input.number {
+    grid-column: 2;
+    grid-row: 1;
+    width: 88px;
+    margin: 0;
+  }
+
+  .video-option input.range {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin: 0;
+  }
+
+  .keybind-container {
+    grid-template-columns: 1fr minmax(110px, 45%);
+  }
+
+  .searchbar-shell {
+    min-height: 42px;
+  }
+
+  .options-section {
+    padding: var(--space-2) var(--space-3) var(--space-3);
+    scroll-margin-top: 64px;
+  }
+
+  .section-heading {
+    padding: 6px 0;
+  }
+
+  #autoEnableURLs,
+  #customSourcePatterns {
+    height: 120px;
+  }
+
+  button {
+    min-height: 42px;
+    padding: var(--control-pad-y) var(--space-3);
+  }
+}
+
+/* ---------- Touch input ---------- */
+@media (pointer: coarse) {
+  input[type="range"] {
+    height: 28px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    border: 2px solid var(--color-elev);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    border: 2px solid var(--color-elev);
+  }
 }
