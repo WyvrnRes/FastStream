@@ -25,6 +25,7 @@ const playMP4URLs = document.getElementById('playmp4urls');
 const downloadAll = document.getElementById('downloadall');
 const keybindsList = document.getElementById('keybindslist');
 const autoEnableURLSInput = document.getElementById('autoEnableURLs');
+const autoEnableAllSites = document.getElementById('autoenableallsites');
 const autoSub = document.getElementById('autosub');
 const maxSpeed = document.getElementById('maxspeed');
 const maxSize = document.getElementById('maxsize');
@@ -76,6 +77,7 @@ if (!EnvUtils.isExtension()) {
   autoSub.disabled = true;
   autoplayYoutube.disabled = true;
   autoEnableURLSInput.disabled = true;
+  autoEnableAllSites.disabled = true;
   customSourcePatterns.disabled = true;
   miniSize.disabled = true;
   // ytclient.disabled = true;
@@ -154,11 +156,23 @@ async function loadOptions(newOptions) {
   });
 
   autoEnableURLSInput.value = Options.autoEnableURLs.join('\n');
+  autoEnableAllSites.checked = !!Options.autoEnableAllSites;
+  updateAutoEnableURLsHint();
 
   if (Options.dev) {
     document.getElementById('dev').style.display = '';
   }
   initsearch();
+}
+
+function updateAutoEnableURLsHint() {
+  const key = autoEnableAllSites.checked ? 'options_autourl_body_inverted' : 'options_autourl_body';
+  const message = Localize.getMessage(key);
+  const bodyElement = document.querySelector('[data-i18n="options_autourl_body"]');
+  if (bodyElement) {
+    bodyElement.textContent = message;
+  }
+  autoEnableURLSInput.title = message;
 }
 
 function createSelectMenu(container, options, selected, localPrefix, callback) {
@@ -482,6 +496,12 @@ WebUtils.setupTabIndex(document.getElementById('resetdefault'));
 
 autoEnableURLSInput.addEventListener('change', (e) => {
   Options.autoEnableURLs = autoEnableURLSInput.value.split('\n').map((o)=>o.trim()).filter((o)=>o.length);
+  optionChanged();
+});
+
+autoEnableAllSites.addEventListener('change', () => {
+  Options.autoEnableAllSites = autoEnableAllSites.checked;
+  updateAutoEnableURLsHint();
   optionChanged();
 });
 

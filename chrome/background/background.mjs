@@ -138,7 +138,11 @@ chrome.tabs.onUpdated.addListener((tabid, changeInfo, tabobj) => {
       return false;
     });
 
-    const shouldAutoEnable = match && !match.negative;
+    // When autoEnableAllSites is on, the list acts in reverse: FastStream is enabled
+    // everywhere except on matched URLs, and entries prefixed with '!' re-enable it.
+    const shouldAutoEnable = Options.autoEnableAllSites ?
+      !(match && !match.negative) :
+      !!(match && !match.negative);
 
 
     if (BackgroundUtils.isUrlPlayerUrl(tab.url)) {

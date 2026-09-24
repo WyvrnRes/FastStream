@@ -83,4 +83,12 @@ export const DefaultToolSettings = {
     'location': 'extra',
     'priority': 600,
   },
+  'fitmode': {
+    'location': 'extra',
+    'priority': 700,
+  },
+  'orientationlock': {
+    'location': 'extra',
+    'priority': 800,
+  },
 };

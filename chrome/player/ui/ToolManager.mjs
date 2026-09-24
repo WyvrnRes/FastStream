@@ -1,6 +1,7 @@
 import {PlayerModes} from '../enums/PlayerModes.mjs';
 import {Sortable} from '../modules/sortable.mjs';
 import {EnvUtils} from '../utils/EnvUtils.mjs';
+import {OrientationUtils} from '../utils/OrientationUtils.mjs';
 import {Utils} from '../utils/Utils.mjs';
 import {DOMElements} from './DOMElements.mjs';
 
@@ -136,6 +137,12 @@ export class ToolManager {
       DOMElements.nextVideo.classList.add('hidden');
     }
 
+    if (OrientationUtils.isSupported()) {
+      DOMElements.orientationLockButton.classList.remove('hidden');
+    } else {
+      DOMElements.orientationLockButton.classList.add('hidden');
+    }
+
     // Safari doesn't allow webaudio unless the video itself is playing from the same origin
     if ((EnvUtils.isSafari() && this.client.player && this.client.player.getSource().mode !== PlayerModes.DIRECT) || !EnvUtils.isWebAudioSupported()) {
       DOMElements.audioConfigBtn.classList.add('hidden');
@@ -156,6 +163,8 @@ export class ToolManager {
       playrate: DOMElements.playbackRate,
       fullscreen: DOMElements.fullscreen,
       windowedfs: DOMElements.windowedFullscreen,
+      fitmode: DOMElements.fitModeButton,
+      orientationlock: DOMElements.orientationLockButton,
       subtitles: DOMElements.subtitles,
       audioconfig: DOMElements.audioConfigBtn,
       sources: DOMElements.linkButton,

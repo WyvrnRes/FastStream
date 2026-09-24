@@ -15,6 +15,7 @@ import {Localize} from './modules/Localize.mjs';
 import {ClickActions} from './options/defaults/ClickActions.mjs';
 import {VisChangeActions} from './options/defaults/VisChangeActions.mjs';
 import {MiniplayerPositions} from './options/defaults/MiniplayerPositions.mjs';
+import {VideoFitModes} from './options/defaults/VideoFitModes.mjs';
 import {SecureMemory} from './modules/SecureMemory.mjs';
 import {CSSFilterUtils} from './utils/CSSFilterUtils.mjs';
 import {DaltonizerTypes} from './options/defaults/DaltonizerTypes.mjs';
@@ -91,6 +92,8 @@ export class FastStreamClient extends EventEmitter {
       maximumDownloaders: 6,
       maxPlaybackRate: EnvUtils.isChrome() ? 16 : 8,
       youtubePlayerID: '',
+      videoFitMode: VideoFitModes.FIT,
+      autoRotateFullscreen: true,
     };
     this.state = {
       playing: false,
@@ -342,6 +345,10 @@ export class FastStreamClient extends EventEmitter {
     this.options.videoZoom = options.videoZoom;
     this.options.previewEnabled = options.previewEnabled;
     this.options.videoDelay = options.videoDelay;
+    if (!this.interfaceController.playerUIStateLoaded) {
+      this.options.videoFitMode = options.videoFitMode || VideoFitModes.FIT;
+    }
+    this.options.autoRotateFullscreen = options.autoRotateFullscreen !== false;
     document.body.dataset.theme = options.colorTheme;
     // save color theme to local storage
     localStorage.setItem('faststream-color-theme', options.colorTheme);
@@ -363,6 +370,8 @@ export class FastStreamClient extends EventEmitter {
     this.options.defaultQuality = options.defaultQuality;
 
     this.updateCSSFilters();
+    this.updateVideoFitMode();
+    this.interfaceController.updateFitModeButton();
 
     if (options.keybinds) {
       this.keybindManager.setKeybinds(options.keybinds);
@@ -387,6 +396,13 @@ export class FastStreamClient extends EventEmitter {
     this.interfaceController.updateAutoNextIndicator();
 
     this.syncedAudioPlayer?.setVideoDelay(this.options.videoDelay);
+  }
+
+  /**
+   * Updates CSS filters and transforms for video elements.
+   */
+  updateVideoFitMode() {
+    DOMElements.videoContainer.dataset.fitMode = this.options.videoFitMode || VideoFitModes.FIT;
   }
 
   /**
@@ -825,6 +841,7 @@ export class FastStreamClient extends EventEmitter {
 
       await this.player.setSource(source);
       this.interfaceController.addVideo(this.player.getVideo());
+      this.updateVideoFitMode();
 
       if (EnvUtils.isWebAudioSupported()) {
         this.initiateWebAudio();

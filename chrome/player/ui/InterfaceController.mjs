@@ -4,12 +4,14 @@ import {Coloris} from '../modules/coloris.mjs';
 import {Localize} from '../modules/Localize.mjs';
 import {ClickActions} from '../options/defaults/ClickActions.mjs';
 import {MiniplayerPositions} from '../options/defaults/MiniplayerPositions.mjs';
+import {VideoFitModes} from '../options/defaults/VideoFitModes.mjs';
 import {VisChangeActions} from '../options/defaults/VisChangeActions.mjs';
 import {EnvUtils} from '../utils/EnvUtils.mjs';
 import {InterfaceUtils} from '../utils/InterfaceUtils.mjs';
 import {StringUtils} from '../utils/StringUtils.mjs';
 import {URLUtils} from '../utils/URLUtils.mjs';
 import {Utils} from '../utils/Utils.mjs';
+import {OrientationUtils} from '../utils/OrientationUtils.mjs';
 import {WebUtils} from '../utils/WebUtils.mjs';
 import {DOMElements} from './DOMElements.mjs';
 import {FineTimeControls} from './FineTimeControls.mjs';
@@ -39,6 +41,9 @@ export class InterfaceController {
     this.mouseActivityCooldown = 0;
 
     this.failed = false;
+    this.autoRotatedFullscreen = false;
+    this.orientationUnwatch = null;
+    this.playerUIStateLoaded = false;
 
     this.toolManager = new ToolManager(this.client, this);
 
@@ -363,6 +368,23 @@ export class InterfaceController {
     });
     WebUtils.setupTabIndex(DOMElements.windowedFullscreen);
 
+    DOMElements.fitModeButton.addEventListener('click', () => {
+      this.cycleFitMode();
+    });
+    WebUtils.setupTabIndex(DOMElements.fitModeButton);
+
+    DOMElements.orientationLockButton.addEventListener('click', () => {
+      this.toggleOrientationLock();
+    });
+    WebUtils.setupTabIndex(DOMElements.orientationLockButton);
+
+    this.loadPlayerUIState().catch((e) => {
+      console.warn('Failed to load player UI state', e);
+    });
+    this.setupOrientationAutoRotate();
+    this.updateFitModeButton();
+    this.updateOrientationLockButton();
+
     document.addEventListener('fullscreenchange', this.updateFullScreenButton.bind(this));
 
     DOMElements.playerContainer.addEventListener('mousemove', this.onPlayerMouseMove.bind(this));
@@ -384,20 +406,21 @@ export class InterfaceController {
     let holdTimeout = null;
     let lastSpeed = null;
     let wasPlaying = false;
-    DOMElements.videoContainer.addEventListener('mousedown', (e)=>{
-      if (e.button === 0) {
-        clearTimeout(holdTimeout);
-        holdTimeout = setTimeout(() => {
-          if (lastSpeed !== null || !this.client.player) {
-            return;
-          }
-          wasPlaying = this.state.playing;
-          lastSpeed = this.client.playbackRate;
-          this.client.playbackRate = lastSpeed * 2;
-
-          this.client.play();
-        }, 800);
+    DOMElements.videoContainer.addEventListener('pointerdown', (e)=>{
+      if (e.pointerType === 'mouse' && e.button !== 0) {
+        return;
       }
+      clearTimeout(holdTimeout);
+      holdTimeout = setTimeout(() => {
+        if (lastSpeed !== null || !this.client.player) {
+          return;
+        }
+        wasPlaying = this.state.playing;
+        lastSpeed = this.client.playbackRate;
+        this.client.playbackRate = lastSpeed * 2;
+
+        this.client.play();
+      }, 800);
     });
 
     const stopSpeedUp = () => {
@@ -412,80 +435,13 @@ export class InterfaceController {
       clearTimeout(holdTimeout);
     };
 
-    // DOMElements.videoContainer.addEventListener('mouseup', (e)=>{
-    //   stopSpeedUp();
-    // });
-
-    DOMElements.videoContainer.addEventListener('mouseleave', (e)=>{
+    DOMElements.videoContainer.addEventListener('pointerup', stopSpeedUp);
+    DOMElements.videoContainer.addEventListener('pointercancel', stopSpeedUp);
+    DOMElements.videoContainer.addEventListener('mouseleave', ()=>{
       stopSpeedUp();
     });
 
-    let clickCount = 0;
-    let clickTimeout = null;
-    DOMElements.videoContainer.addEventListener('click', (e) => {
-      clearTimeout(holdTimeout);
-      if (lastSpeed !== null) {
-        stopSpeedUp();
-        return;
-      }
-
-      if (this.closeAllMenus(false)) {
-        return;
-      }
-
-      if (InterfaceUtils.closeWindows()) {
-        return;
-      }
-
-      if (this.isBigPlayButtonVisible()) {
-        this.playPauseToggle();
-        return;
-      }
-
-      if (clickTimeout !== null) {
-        clickCount++;
-      } else {
-        clickCount = 1;
-      }
-      clearTimeout(clickTimeout);
-      clickTimeout = setTimeout(() => {
-        clickTimeout = null;
-
-        let clickAction;
-        if (clickCount === 1) {
-          clickAction = this.client.options.singleClickAction;
-        } else if (clickCount === 2) {
-          clickAction = this.client.options.doubleClickAction;
-        } else if (clickCount === 3) {
-          clickAction = this.client.options.tripleClickAction;
-        } else {
-          return;
-        }
-
-        switch (clickAction) {
-          case ClickActions.FULLSCREEN:
-            this.fullscreenToggle();
-            break;
-          case ClickActions.WINDOWED_FULLSCREEN:
-            this.toggleWindowedFullscreen();
-            break;
-          case ClickActions.PIP:
-            this.pipToggle();
-            break;
-          case ClickActions.PLAY_PAUSE:
-            this.playPauseToggle();
-            break;
-          case ClickActions.HIDE_CONTROLS:
-            this.focusingControls = false;
-            this.mouseOverControls = false;
-            this.hideControlBar();
-            break;
-          case ClickActions.HIDE_PLAYER:
-            this.toggleHide();
-            break;
-        }
-      }, clickCount < 3 ? 300 : 0);
-    });
+    this.setupTapZones(stopSpeedUp);
     DOMElements.hideButton.addEventListener('click', () => {
       DOMElements.hideButton.blur();
       this.focusingControls = false;
@@ -1082,6 +1038,207 @@ export class InterfaceController {
     }, (response) => {
       this.state.windowedFullscreen = response === 'enter';
     });
+  }
+
+  setupTapZones(stopSpeedUp) {
+    let clickCount = 0;
+    let clickTimeout = null;
+    const seekAmount = ()=> Math.max(10, this.client.options.seekStepSize * 5);
+
+    const handleTapAction = (clickAction) => {
+      switch (clickAction) {
+        case ClickActions.FULLSCREEN:
+          this.fullscreenToggle();
+          break;
+        case ClickActions.WINDOWED_FULLSCREEN:
+          this.toggleWindowedFullscreen();
+          break;
+        case ClickActions.PIP:
+          this.pipToggle();
+          break;
+        case ClickActions.PLAY_PAUSE:
+          this.playPauseToggle();
+          break;
+        case ClickActions.HIDE_CONTROLS:
+          this.focusingControls = false;
+          this.mouseOverControls = false;
+          this.hideControlBar();
+          break;
+        case ClickActions.HIDE_PLAYER:
+          this.toggleHide();
+          break;
+      }
+    };
+
+    const handleSeekTap = (direction) => {
+      stopSpeedUp();
+      if (!this.client.player) return;
+      if (this.closeAllMenus(false)) return;
+      if (InterfaceUtils.closeWindows()) return;
+      if (this.isBigPlayButtonVisible()) {
+        this.playPauseToggle();
+        return;
+      }
+
+      const amount = seekAmount();
+      this.client.setSeekSave(false);
+      this.client.currentTime += direction === 'left' ? -amount : amount;
+      this.client.setSeekSave(true);
+      this.showSeekIndicator(direction, amount);
+      this.showControlBarTemporarily(1200);
+    };
+
+    DOMElements.tapZoneLeft.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleSeekTap('left');
+    });
+
+    DOMElements.tapZoneRight.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleSeekTap('right');
+    });
+
+    DOMElements.tapZoneCenter.addEventListener('click', (e) => {
+      stopSpeedUp();
+      e.stopPropagation();
+      if (this.closeAllMenus(false)) return;
+      if (InterfaceUtils.closeWindows()) return;
+      if (this.isBigPlayButtonVisible()) {
+        this.playPauseToggle();
+        return;
+      }
+
+      clickCount = clickTimeout !== null ? clickCount + 1 : 1;
+      clearTimeout(clickTimeout);
+      clickTimeout = setTimeout(() => {
+        clickTimeout = null;
+        let clickAction;
+        if (clickCount === 1) {
+          clickAction = this.client.options.singleClickAction;
+        } else if (clickCount === 2) {
+          clickAction = this.client.options.doubleClickAction;
+        } else if (clickCount === 3) {
+          clickAction = this.client.options.tripleClickAction;
+        } else {
+          return;
+        }
+        handleTapAction(clickAction);
+      }, clickCount < 3 ? 300 : 0);
+    });
+  }
+
+  showSeekIndicator(direction, amount) {
+    if (!DOMElements.seekIndicator || !DOMElements.seekIndicatorText) {
+      return;
+    }
+    DOMElements.seekIndicatorText.textContent = `${direction === 'left' ? '-' : '+'}${Math.round(amount)}s`;
+    DOMElements.seekIndicator.classList.remove('left', 'right', 'active');
+    DOMElements.seekIndicatorArrowsLeft?.classList.remove('active');
+    DOMElements.seekIndicatorArrowsRight?.classList.remove('active');
+    void DOMElements.seekIndicator.offsetWidth;
+    DOMElements.seekIndicator.classList.add(direction, 'active');
+    const activeArrows = direction === 'left' ? DOMElements.seekIndicatorArrowsLeft : DOMElements.seekIndicatorArrowsRight;
+    activeArrows?.classList.add('active');
+    setTimeout(() => {
+      DOMElements.seekIndicator.classList.remove('active');
+      activeArrows?.classList.remove('active');
+    }, 450);
+  }
+
+  async loadPlayerUIState() {
+    if (this.playerUIStateLoaded) {
+      return;
+    }
+    this.playerUIStateLoaded = true;
+    const state = await Utils.loadAndParseOptions('playerUIState', {
+      videoFitMode: VideoFitModes.FIT,
+      orientationLock: 'none',
+    });
+    this.client.options.videoFitMode = state.videoFitMode || VideoFitModes.FIT;
+    this.client.updateVideoFitMode();
+    this.orientationLock = state.orientationLock || 'none';
+    this.updateFitModeButton();
+    this.updateOrientationLockButton();
+    if (this.orientationLock !== 'none') {
+      await OrientationUtils.lock(this.orientationLock);
+    }
+  }
+
+  savePlayerUIState() {
+    return Utils.setConfig('playerUIState', JSON.stringify({
+      videoFitMode: this.client.options.videoFitMode,
+      orientationLock: this.orientationLock || 'none',
+    }));
+  }
+
+  cycleFitMode() {
+    const fitModes = [VideoFitModes.FIT, VideoFitModes.STRETCH, VideoFitModes.CROP];
+    const index = fitModes.indexOf(this.client.options.videoFitMode);
+    this.client.options.videoFitMode = fitModes[(index + 1 + fitModes.length) % fitModes.length];
+    this.client.updateVideoFitMode();
+    this.updateFitModeButton();
+    this.savePlayerUIState();
+    this.showControlBarTemporarily(1500);
+  }
+
+  async toggleOrientationLock() {
+    const states = ['none', 'landscape', 'portrait'];
+    const current = states.indexOf(this.orientationLock || 'none');
+    this.orientationLock = states[(current + 1 + states.length) % states.length];
+    if (this.orientationLock === 'none') {
+      await OrientationUtils.unlock();
+    } else {
+      await OrientationUtils.lock(this.orientationLock);
+    }
+    this.updateOrientationLockButton();
+    this.savePlayerUIState();
+    this.showControlBarTemporarily(1500);
+  }
+
+  setupOrientationAutoRotate() {
+    if (this.orientationUnwatch) {
+      return;
+    }
+    this.orientationUnwatch = OrientationUtils.watchRotation(async (isLandscape) => {
+      if (!this.client.player || !this.client.options.autoRotateFullscreen) {
+        return;
+      }
+      if (isLandscape && !this.state.fullscreen) {
+        this.autoRotatedFullscreen = true;
+        await this.fullscreenToggle(true).catch(() => {});
+      } else if (!isLandscape && this.autoRotatedFullscreen && this.state.fullscreen) {
+        this.autoRotatedFullscreen = false;
+        await this.fullscreenToggle(false).catch(() => {});
+      }
+    });
+  }
+
+  updateFitModeButton() {
+    if (!DOMElements.fitModeButton) {
+      return;
+    }
+    DOMElements.fitModeButton.dataset.fitMode = this.client.options.videoFitMode;
+    let label = Localize.getMessage('player_fitmode_label');
+    if (this.client.options.videoFitMode === VideoFitModes.STRETCH) {
+      label = Localize.getMessage('player_fitmode_stretch_label');
+    } else if (this.client.options.videoFitMode === VideoFitModes.CROP) {
+      label = Localize.getMessage('player_fitmode_crop_label');
+    } else {
+      label = Localize.getMessage('player_fitmode_fit_label');
+    }
+    WebUtils.setLabels(DOMElements.fitModeButton, label);
+  }
+
+  updateOrientationLockButton() {
+    if (!DOMElements.orientationLockButton) {
+      return;
+    }
+    DOMElements.orientationLockButton.classList.toggle('locked', (this.orientationLock || 'none') !== 'none');
+    DOMElements.orientationLockButton.dataset.lock = this.orientationLock || 'none';
+    const label = (this.orientationLock || 'none') === 'none' ?
+      Localize.getMessage('player_orientationlock_label') :
+      Localize.getMessage('player_orientationlock_locked_label', [this.orientationLock || 'none']);
+    WebUtils.setLabels(DOMElements.orientationLockButton, label);
   }
 
   async fullscreenToggle(force) {

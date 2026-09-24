@@ -5,6 +5,7 @@ import {ColorThemes} from './ColorThemes.mjs';
 import {DaltonizerTypes} from './DaltonizerTypes.mjs';
 import {DefaultKeybinds} from './DefaultKeybinds.mjs';
 import {MiniplayerPositions} from './MiniplayerPositions.mjs';
+import {VideoFitModes} from './VideoFitModes.mjs';
 import {VisChangeActions} from './VisChangeActions.mjs';
 
 export const DefaultOptions = {
@@ -23,6 +24,7 @@ export const DefaultOptions = {
   defaultQuality: `Auto`,
   colorTheme: ColorThemes.DEFAULT,
   autoEnableURLs: [],
+  autoEnableAllSites: false,
   customSourcePatterns: ``,
   keybinds: DefaultKeybinds,
   videoBrightness: 1,
@@ -47,4 +49,6 @@ export const DefaultOptions = {
   videoDelay: 0,
   maximumDownloaders: 6,
   youtubePlayerID: '',
+  videoFitMode: VideoFitModes.FIT,
+  autoRotateFullscreen: true,
 };

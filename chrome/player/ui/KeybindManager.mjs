@@ -210,6 +210,14 @@ export class KeybindManager extends EventEmitter {
       this.client.updateCSSFilters();
     });
 
+    this.on('CycleFitMode', (e) => {
+      this.client.interfaceController.cycleFitMode();
+    });
+
+    this.on('ToggleOrientationLock', (e) => {
+      this.client.interfaceController.toggleOrientationLock();
+    });
+
     this.on('WindowedFullscreen', (e) => {
       this.client.interfaceController.toggleWindowedFullscreen();
     });

@@ -19,6 +19,18 @@
     <div class="mainplayer fluid_video_wrapper fluid_player_layout_default controls_visible" role="application"
         tabindex="-1">
         <div class="video-container"></div>
+        <div class="tap_zone_left"></div>
+        <div class="tap_zone_center"></div>
+        <div class="tap_zone_right"></div>
+        <div class="seek_indicator">
+            <div class="seek_indicator_arrows seek_indicator_arrows_left" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="seek_indicator_text">+10s</div>
+            <div class="seek_indicator_arrows seek_indicator_arrows_right" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
         <div class="fluid_subtitles_container"></div>
         <div class="fluid_controls_container fade_in">
             <div class="skip_button" style="display: none;" tabindex="0" role="button"></div>
@@ -216,6 +228,18 @@
                         class="fluid_button fluid_control_windowed_fullscreen">
                         <svg>
                             <use href="assets/fluidplayer/static/icons2.svg#windowed-fs"></use>
+                        </svg>
+                    </div>
+                    <div role="button" data-i18n-label="player_fitmode_label"
+                        class="fluid_button fluid_control_fitmode">
+                        <svg>
+                            <use href="assets/fluidplayer/static/icons2.svg#fitmode"></use>
+                        </svg>
+                    </div>
+                    <div role="button" data-i18n-label="player_orientationlock_label"
+                        class="fluid_button fluid_control_orientationlock">
+                        <svg>
+                            <use href="assets/fluidplayer/static/icons2.svg#orientation-lock"></use>
                         </svg>
                     </div>
 

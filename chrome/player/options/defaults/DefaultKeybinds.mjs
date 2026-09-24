@@ -38,6 +38,8 @@ export const DefaultKeybinds = {
   'ZoomOutVideo': 'None',
   'ZoomReset': 'None',
   'ToggleVisualFilters': 'KeyQ',
+  'CycleFitMode': 'None',
+  'ToggleOrientationLock': 'None',
 };
 
 export const KeybindsWithModifiers = [

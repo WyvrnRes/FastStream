@@ -203,10 +203,15 @@ body {
 }
 
 .fluid_initial_play {
-    width: 60px;
-    height: 60px;
+    width: 72px;
+    height: 72px;
     border-radius: 50px;
     cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.fluid_control_playpause_big_circle.transform-active {
+    animation: playpause-pop 0.45s ease;
 }
 
 .fluid_initial_play_button {
@@ -250,23 +255,23 @@ body {
     left: 0;
     right: 0;
     background: var(--controls-background);
-    height: 53px;
+    height: 72px;
     z-index: 3;
     transition: all 0.5s !important;
 }
 
 .fluid_controls_bottom_container {
     position: absolute;
-    top: 20px;
+    top: 28px;
     left: 15px;
     right: 15px;
-    height: 30px;
+    height: 40px;
     display: flex;
     white-space: nowrap;
 }
 
 .expanded.controls_visible .fluid_controls_container {
-    height: 133px;
+    height: 152px;
 }
 
 .fluid_subtitles_container {
@@ -349,7 +354,7 @@ body {
 .fluid_controls_right {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
 }
 
 .tools_container_left {
@@ -511,6 +516,21 @@ body {
 .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button,
 .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_slider {
     cursor: pointer;
+}
+
+.fluid_button {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fluid_control_fitmode[data-fit-mode="stretch"],
+.fluid_control_fitmode[data-fit-mode="crop"],
+.fluid_control_orientationlock.locked {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
 }
 
 .fluid_video_source_sublist_item,
@@ -727,6 +747,112 @@ body {
     inset: 0px;
     width: 100%;
     height: 100%;
+    object-fit: contain;
+}
+
+.video-container[data-fit-mode="stretch"]>video {
+    object-fit: fill;
+}
+
+.video-container[data-fit-mode="crop"]>video {
+    object-fit: cover;
+}
+
+.tap_zone_left,
+.tap_zone_center,
+.tap_zone_right {
+    position: absolute;
+    top: 0;
+    bottom: 72px;
+    z-index: 2;
+}
+
+.tap_zone_left {
+    left: 0;
+    width: 33.33%;
+}
+
+.tap_zone_center {
+    left: 33.33%;
+    width: 33.34%;
+}
+
+.tap_zone_right {
+    right: 0;
+    width: 33.33%;
+}
+
+.seek_indicator {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    min-width: 128px;
+    padding: 14px 18px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.seek_indicator_text {
+    min-width: 52px;
+}
+
+.seek_indicator_arrows {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+    opacity: 0.35;
+}
+
+.seek_indicator_arrows span {
+    width: 11px;
+    height: 11px;
+    display: inline-block;
+    border-top: 3px solid currentColor;
+    border-right: 3px solid currentColor;
+    opacity: 0.25;
+}
+
+.seek_indicator_arrows_left span {
+    transform: rotate(-135deg);
+}
+
+.seek_indicator_arrows_right span {
+    transform: rotate(45deg);
+}
+
+.seek_indicator_arrows.active span {
+    animation: seek-arrow-pop 0.45s ease;
+}
+
+.seek_indicator_arrows.active span:nth-child(2) {
+    animation-delay: 0.05s;
+}
+
+.seek_indicator_arrows.active span:nth-child(3) {
+    animation-delay: 0.1s;
+}
+
+.seek_indicator.left {
+    left: 10%;
+}
+
+.seek_indicator.right {
+    right: 10%;
+}
+
+.seek_indicator.active {
+    animation: seek-flash 0.45s ease;
 }
 
 .mainplayer {
@@ -2995,18 +3121,18 @@ input.crosstalk_calculator_input {
     }
 
     .fluid_controls_extra_tools {
-        gap: 2px;
+        gap: 4px;
     }
 
     .fluid_button {
-        width: 18px;
-        height: 18px;
+        min-width: 40px;
+        min-height: 40px;
     }
 
     .fluid_controls_right,
     .fluid_controls_left,
     .tools_container_left {
-        gap: 2px;
+        gap: 4px;
     }
 
     .status_message,
@@ -3052,7 +3178,7 @@ input.crosstalk_calculator_input {
 @media screen and (max-width: 500px) {
 
     body {
-        --font-size-small: 9px;
+        --font-size-small: 11px;
         --volume-block-width: 100px;
     }
 
@@ -3308,6 +3434,57 @@ input.crosstalk_calculator_input {
     background-color: rgba(255, 255, 255, 0.1);
     border: none;
     outline: none;
+}
+
+@keyframes playpause-pop {
+    0% {
+        transform: scale(0.88);
+        opacity: 0.2;
+    }
+
+    50% {
+        transform: scale(1.06);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+}
+
+@keyframes seek-flash {
+    0% {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.9);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.02);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+@keyframes seek-arrow-pop {
+    0% {
+        opacity: 0.15;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+
+    100% {
+        opacity: 0.25;
+        transform: scale(1);
+    }
 }
 
 .convolver_impulse_length_container .convolver_impulse_length_input:focus {

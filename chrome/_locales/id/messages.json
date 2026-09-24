@@ -1180,5 +1180,23 @@
     },
     "ytslowdown_ok": {
         "message": "OK"
+    },
+    "player_fitmode_label": {
+        "message": "Cycle video fit mode"
+    },
+    "player_fitmode_fit_label": {
+        "message": "Video fit mode: fit"
+    },
+    "player_fitmode_stretch_label": {
+        "message": "Video fit mode: stretch"
+    },
+    "player_fitmode_crop_label": {
+        "message": "Video fit mode: crop"
+    },
+    "player_orientationlock_label": {
+        "message": "Toggle orientation lock"
+    },
+    "player_orientationlock_locked_label": {
+        "message": "Orientation lock: $1"
     }
 }
