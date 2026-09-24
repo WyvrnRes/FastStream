@@ -474,6 +474,9 @@ export class InterfaceController {
     }, false);
 
     DOMElements.settingsButton.addEventListener('click', (e) => {
+      // The overlay ('more') sheet has a higher z-index than the settings window,
+      // so close it here (this click stops propagation) to avoid it floating on top.
+      this.closeAllMenus();
       if (e.shiftKey) {
         chrome.runtime.openOptionsPage();
       } else {

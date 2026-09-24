@@ -3183,8 +3183,7 @@ input.crosstalk_calculator_input {
     }
 
     .fluid_controls_right:not(.reordering)>.fluid_button_soundwave,
-    .fluid_controls_right:not(.reordering)>.fluid_button_link,
-    .fluid_controls_right:not(.reordering)>.fluid_button_settings {
+    .fluid_controls_right:not(.reordering)>.fluid_button_link {
         display: none !important;
     }
 

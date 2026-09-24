@@ -44,8 +44,8 @@ export const DefaultToolSettings = {
     'priority': 600,
   },
   'settings': {
-    'location': 'right',
-    'priority': 700,
+    'location': 'extra',
+    'priority': 900,
   },
   'more': {
     'location': 'right',
