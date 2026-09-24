@@ -1,0 +1,36 @@
+chrome/player/utils/SearchUtils.mjs
+  h_ce6b902e78ef3d 49-53,120-124
+build.mjs
+  h_ce6b902e78ef3d 39-56
+chrome/_locales/en/messages.json
+  h_ce6b902e78ef3d 974-985
+chrome/player/FastStreamClient.mjs
+  h_ce6b902e78ef3d 18,87,318
+chrome/player/assets/fluidplayer/css/fluidplayer.css
+  h_ce6b902e78ef3d 3148-3156
+chrome/player/options/defaults/DefaultOptions.mjs
+  h_ce6b902e78ef3d 8,44
+chrome/player/options/defaults/TapCounts.mjs
+  h_ce6b902e78ef3d 1-5
+chrome/player/options/index.html
+  h_ce6b902e78ef3d 7,291-298
+chrome/player/options/options.css
+  h_ce6b902e78ef3d 4-7,20-23,30-41,63-64,105-109,112-117,223,225-226,240-241,245,266-271,361-362,369-373,386,451-455,463-465,469-514,536-551,588,592-593,606,642,646-647,652,673-804
+chrome/player/options/options.mjs
+  h_ce6b902e78ef3d 20,42,71-120,170,280-284
+chrome/player/ui/InterfaceController.mjs
+  h_ce6b902e78ef3d 7,1051-1054,1082-1103,1113-1128,1133,1138
+combined-locales.json
+  h_ce6b902e78ef3d 5834-5845
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "764331732cb2aee9f81c51dfad6cf1924ef58e9e",
+  "prompts": {},
+  "humans": {
+    "h_ce6b902e78ef3d": {
+      "author": "Wyvrn Res <wyvrnres@users.noreply.github.com>"
+    }
+  }
+}
